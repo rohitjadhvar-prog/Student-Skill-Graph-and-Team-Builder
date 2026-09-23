@@ -15,6 +15,8 @@ import sqlite3
 import os
 import shutil
 
+import tempfile
+
 ORIGINAL_DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "skills.db")
 
 def get_db_path():
@@ -24,13 +26,14 @@ def get_db_path():
     copies the seeded skills.db to /tmp/skills.db so write operations (INSERT/UPDATE/DELETE) succeed.
     """
     if os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
-        tmp_db = "/tmp/skills.db"
+        tmp_dir = "/tmp" if os.path.exists("/tmp") else tempfile.gettempdir()
+        tmp_db = os.path.join(tmp_dir, "skills.db")
         if not os.path.exists(tmp_db):
             if os.path.exists(ORIGINAL_DB_PATH):
                 try:
                     shutil.copy2(ORIGINAL_DB_PATH, tmp_db)
                 except Exception as e:
-                    print(f"Warning: Failed to copy SQLite database to /tmp: {e}")
+                    print(f"Warning: Failed to copy SQLite database to temp: {e}")
         return tmp_db
     return ORIGINAL_DB_PATH
 
