@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Skill Graph & Team Builder</title>
+  
+  <!-- Inter Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Vis.js Network for NetworkX Graph Visualization -->
+  <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+  
+  <!-- Chart.js for Faculty Analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Application CSS -->
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <!-- Global App Container -->
+  <div class="app-layout">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">
+          <i class="fa-solid fa-diagram-project"></i>
+        </div>
+        <div class="brand-text">
+          <h2>SkillGraph</h2>
+          <span class="sub-brand">& Team Builder</span>
+        </div>
+      </div>
+
+      <!-- Quick Role & Identity Card -->
+      <div class="identity-card" id="identity-card-box">
+        <div class="identity-header">
+          <span class="badge-role" id="active-role-badge">Student</span>
+          <span class="identity-label" id="active-identity-label">Portal</span>
+        </div>
+        <div class="identity-body">
+          <div class="avatar" id="active-avatar">AS</div>
+          <div class="identity-meta">
+            <h4 id="active-user-name">Aditya Sharma</h4>
+            <p id="active-user-sub">Computer Science • Year 2</p>
+          </div>
+        </div>
+        <div class="identity-actions" style="display: flex; gap: 6px; flex-direction: column;">
+          <button class="btn-switch role-student-only" onclick="openStudentSwitcherModal()">
+            <i class="fa-solid fa-users"></i> Switch Student Demo
+          </button>
+          <button class="btn-switch" onclick="handleLogout()" style="color: #F87171; border-color: rgba(239, 68, 68, 0.3);">
+            <i class="fa-solid fa-power-off"></i> Logout
+          </button>
+        </div>
+      </div>
+
+      <!-- Navigation Menu -->
+      <nav class="nav-menu">
+        <!-- STUDENT ONLY SECTION -->
+        <div class="nav-section-title role-student-only">STUDENT PORTAL</div>
+        <a href="#home" class="nav-item active role-student-only" data-tab="home">
+          <i class="fa-solid fa-house"></i>
+          <span>Home & Overview</span>
+        </a>
+        <a href="#student-dash" class="nav-item role-student-only" data-tab="student-dash">
+          <i class="fa-solid fa-user-graduate"></i>
+          <span>My Dashboard</span>
+        </a>
+        <a href="#my-skills" class="nav-item role-student-only" data-tab="my-skills">
+          <i class="fa-solid fa-award"></i>
+          <span>My Skills</span>
+        </a>
+        <a href="#my-profile" class="nav-item role-student-only" data-tab="my-profile">
+          <i class="fa-solid fa-id-card"></i>
+          <span>My Profile</span>
+        </a>
+
+        <!-- FACULTY ONLY SECTION -->
+        <div class="nav-section-title role-faculty-only">FACULTY PORTAL</div>
+        <a href="#faculty-dash" class="nav-item role-faculty-only" data-tab="faculty-dash">
+          <i class="fa-solid fa-chart-pie"></i>
+          <span>Faculty Analytics</span>
+        </a>
+        <a href="#create-project" class="nav-item role-faculty-only" data-tab="create-project">
+          <i class="fa-solid fa-plus-circle"></i>
+          <span>Create Project</span>
+        </a>
+        <a href="#student-roster" class="nav-item role-faculty-only" data-tab="student-roster">
+          <i class="fa-solid fa-users-viewfinder"></i>
+          <span>Student Roster</span>
+        </a>
+
+        <!-- SHARED EXPLORATION & COLLABORATION -->
+        <div class="nav-section-title">EXPLORE & TEAMS</div>
+        <a href="#skill-graph" class="nav-item" data-tab="skill-graph">
+          <i class="fa-solid fa-circle-nodes"></i>
+          <span>NetworkX Graph</span>
+          <span class="pill-tag">Live</span>
+        </a>
+        <a href="#projects" class="nav-item" data-tab="projects">
+          <i class="fa-solid fa-folder-open"></i>
+          <span id="nav-projects-label">Projects</span>
+        </a>
+        <a href="#recommendations" class="nav-item role-student-only" data-tab="recommendations">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          <span id="nav-recommendations-label">Team Builder</span>
+        </a>
+
+        <!-- SHARED VIVA -->
+        <div class="nav-section-title">ACADEMICS</div>
+        <a href="#dbms-showcase" class="nav-item" data-tab="dbms-showcase">
+          <i class="fa-solid fa-database"></i>
+          <span>DBMS & SQL Viva</span>
+          <span class="pill-tag accent">Exam</span>
+        </a>
+
+        <div class="nav-section-title">SESSION</div>
+        <a href="javascript:void(0)" class="nav-item" onclick="handleLogout()">
+          <i class="fa-solid fa-power-off"></i>
+          <span>Logout</span>
+        </a>
+      </nav>
+
+      <!-- Sidebar Footer -->
+      <div class="sidebar-footer">
+        <div class="tech-pill">
+          <i class="fa-brands fa-python"></i> Python 3 • Flask • SQLite
+        </div>
+        <p class="college-info">B.Tech College Project</p>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- Top Navbar -->
+      <header class="top-navbar">
+        <div class="nav-breadcrumbs">
+          <span id="breadcrumb-section">SkillGraph</span>
+          <i class="fa-solid fa-chevron-right separator"></i>
+          <span id="breadcrumb-current" class="current">Home & Overview</span>
+        </div>
+
+        <div class="top-actions">
+          <button class="btn-secondary" onclick="fetchLiveStats()" title="Refresh Data">
+            <i class="fa-solid fa-sync"></i> Refresh
+          </button>
+          <button class="btn-primary role-student-only" onclick="switchTab('recommendations')">
+            <i class="fa-solid fa-bolt"></i> Generate Teams
+          </button>
+          <button class="btn-outline-danger" onclick="handleLogout()" title="Logout of current session">
+            <i class="fa-solid fa-power-off"></i> Logout
+          </button>
+        </div>
+      </header>
+
+      <!-- TAB 1: HOME & OVERVIEW -->
+      <section id="tab-home" class="content-tab active">
+        <div class="hero-banner">
+          <div class="hero-content">
+            <div class="hero-badge">
+              <i class="fa-solid fa-lightbulb"></i> Python & DBMS Academic Capstone
+            </div>
+            <h1>Student Skill Graph & Team Builder</h1>
+            <p class="tagline">“Turn scattered student skills into balanced, project-ready teams.”</p>
+            <p class="hero-desc">
+              A transparent, rule-based recommendation platform and NetworkX topological graph system.
+              Powered by an SQLite relational database with strict foreign key constraints, relational joins,
+              and complementary skill balancing.
+            </p>
+            <div class="hero-buttons">
+              <button class="btn-hero-primary role-student-only" onclick="switchTab('recommendations')">
+                <i class="fa-solid fa-people-group"></i> Try Team Recommendation
+              </button>
+              <button class="btn-hero-primary role-faculty-only" onclick="switchTab('faculty-dash')">
+                <i class="fa-solid fa-chart-pie"></i> Open Faculty Analytics
+              </button>
+              <button class="btn-hero-secondary" onclick="switchTab('skill-graph')">
+                <i class="fa-solid fa-circle-nodes"></i> Explore Skill Graph
+              </button>
+              <button class="btn-hero-outline" onclick="switchTab('dbms-showcase')">
+                <i class="fa-solid fa-database"></i> View DBMS Queries
+              </button>
+            </div>
+          </div>
+          <div class="hero-graphic">
+            <div class="workflow-card">
+              <h4>System Workflow</h4>
+              <div class="workflow-steps">
+                <div class="w-step">
+                  <span class="num">1</span>
+                  <div><strong>Profile & Skills</strong><p>Students register skills & proficiency</p></div>
+                </div>
+                <div class="w-step">
+                  <span class="num">2</span>
+                  <div><strong>NetworkX Graph</strong><p>Heterogeneous Student-Skill-Project graph</p></div>
+                </div>
+                <div class="w-step">
+                  <span class="num">3</span>
+                  <div><strong>Rule-based Matching</strong><p>Heuristic complementary skill coverage</p></div>
+                </div>
+                <div class="w-step">
+                  <span class="num">4</span>
+                  <div><strong>Balanced Teams</strong><p>Coverage %, matched skills & gap analysis</p></div>
+                </div>
+                <div class="w-step">
+                  <span class="num">5</span>
+                  <div><strong>Faculty Approval</strong><p>Review & approve in SQLite database</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Problem & Solution Cards -->
+        <div class="grid-2-col mt-4">
+          <div class="card problem-card">
+            <div class="card-header">
+              <i class="fa-solid fa-triangle-exclamation icon-warn"></i>
+              <h3>The College Project Problem</h3>
+            </div>
+            <div class="card-body">
+              <p>In academic institutions, students typically form project teams based on friendship rather than skill compatibility:</p>
+              <ul class="styled-list">
+                <li><i class="fa-solid fa-xmark red"></i> Redundant teams where everyone knows Python but nobody knows Frontend or Database.</li>
+                <li><i class="fa-solid fa-xmark red"></i> Scattered student capabilities with no central visibility for faculty mentors.</li>
+                <li><i class="fa-solid fa-xmark red"></i> Frustration during grading due to severe skill gaps and project incompletion.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="card solution-card">
+            <div class="card-header">
+              <i class="fa-solid fa-circle-check icon-success"></i>
+              <h3>The SkillGraph Solution</h3>
+            </div>
+            <div class="card-body">
+              <p>SkillGraph models students and project demands as a mathematical network to solve team composition:</p>
+              <ul class="styled-list">
+                <li><i class="fa-solid fa-check green"></i> Transparent rule-based Python heuristic matching that maximizes skill coverage.</li>
+                <li><i class="fa-solid fa-check green"></i> Prioritizes <strong>complementary skills</strong> rather than duplicated proficiencies.</li>
+                <li><i class="fa-solid fa-check green"></i> Backed by a normalized SQLite relational database with strict DBMS constraints.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tech Stack Highlights -->
+        <div class="mt-4">
+          <h3 class="section-heading">Technology Architecture</h3>
+          <div class="grid-4-col">
+            <div class="tech-card">
+              <div class="tech-icon py"><i class="fa-brands fa-python"></i></div>
+              <h4>Python Flask</h4>
+              <p>RESTful APIs, request routing, session switching, and recommendation engine execution.</p>
+            </div>
+            <div class="tech-card">
+              <div class="tech-icon db"><i class="fa-solid fa-database"></i></div>
+              <h4>SQLite & Relational SQL</h4>
+              <p>7 normalized tables, explicit foreign keys (`ON DELETE CASCADE`), and multi-table `JOIN` queries.</p>
+            </div>
+            <div class="tech-card">
+              <div class="tech-icon nx"><i class="fa-solid fa-circle-nodes"></i></div>
+              <h4>NetworkX</h4>
+              <p>Graph theory modeling: student-skill-project nodes, weighted edges, and degree centrality.</p>
+            </div>
+            <div class="tech-card">
+              <div class="tech-icon js"><i class="fa-solid fa-chart-simple"></i></div>
+              <h4>Vis.js & Chart.js</h4>
+              <p>Interactive force-directed graph canvas and real-time faculty analytical distribution charts.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: STUDENT DASHBOARD -->
+      <section id="tab-student-dash" class="content-tab">
+        <div class="section-header">
+          <div>
+            <h2>Student Dashboard</h2>
+            <p class="subtitle">Overview of your technical profile, competencies, and team assignments</p>
+          </div>
+          <button class="btn-primary" onclick="switchTab('my-skills')">
+            <i class="fa-solid fa-plus"></i> Add New Skill
+          </button>
+        </div>
+
+        <!-- Student KPI Cards -->
+        <div class="grid-4-col">
+          <div class="stat-card">
+            <div class="stat-icon blue"><i class="fa-solid fa-award"></i></div>
+            <div class="stat-details">
+              <span class="stat-label">My Skills</span>
+              <h3 id="dash-skill-count">0</h3>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon purple"><i class="fa-solid fa-diagram-project"></i></div>
+            <div class="stat-details">
+              <span class="stat-label">Assigned Projects</span>
+              <h3 id="dash-project-count">0</h3>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon green"><i class="fa-solid fa-clock"></i></div>
+            <div class="stat-details">
+              <span class="stat-label">Availability</span>
+              <h3 id="dash-availability">High</h3>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon amber"><i class="fa-solid fa-user-graduate"></i></div>
+            <div class="stat-details">
+              <span class="stat-label">Year & Dept</span>
+              <h3 id="dash-dept">CS (Yr 2)</h3>
+            </div>
+          </div>
+        </div>
+
+        <!-- Student Skills & Project Cards -->
+        <div class="grid-2-col mt-4">
+          <div class="card">
+            <div class="card-header space-between">
+              <h3><i class="fa-solid fa-sparkles"></i> My Registered Skills</h3>
+              <button class="btn-sm btn-outline" onclick="switchTab('my-skills')">Manage</button>
+            </div>
+            <div class="card-body">
+              <div id="dash-skills-list" class="skills-pill-container">
+                <!-- Dynamically populated from SQLite -->
+                <p class="text-muted">Loading skills from database...</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header space-between">
+              <h3><i class="fa-solid fa-users"></i> My Team Memberships</h3>
+              <button class="btn-sm btn-outline" onclick="switchTab('projects')">Browse Projects</button>
+            </div>
+            <div class="card-body">
+              <div id="dash-teams-list">
+                <!-- Dynamically populated from SQLite -->
+                <p class="text-muted">Loading team memberships...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recommended Projects for Current Student -->
+        <div class="card mt-4">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-compass"></i> Recommended Projects For Your Skill Set</h3>
+          </div>
+          <div class="card-body">
+            <div id="dash-recommended-projects" class="projects-grid">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: MY SKILLS -->
+      <section id="tab-my-skills" class="content-tab">
+        <div class="section-header">
+          <div>
+            <h2>My Skills & Proficiency</h2>
+            <p class="subtitle">Add, adjust, or remove your technical proficiencies (stored in SQLite `student_skills`)</p>
+          </div>
+        </div>
+
+        <div class="grid-2-col">
+          <!-- Add Skill Form -->
+          <div class="card">
+            <div class="card-header">
+              <h3><i class="fa-solid fa-plus-circle"></i> Add Skill to My Profile</h3>
+            </div>
+            <div class="card-body">
+              <form id="add-skill-form" onsubmit="handleAddStudentSkill(event)">
+                <div class="form-group">
+                  <label for="skill-select">Select Skill from Database</label>
+                  <select id="skill-select" class="form-control" required>
+                    <option value="">-- Choose Skill --</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="proficiency-select">Proficiency Level</label>
+                  <select id="proficiency-select" class="form-control" required>
+                    <option value="Beginner">Beginner (Basic Syntax & Concepts)</option>
+                    <option value="Intermediate" selected>Intermediate (Hands-on Mini Projects)</option>
+                    <option value="Advanced">Advanced (Production / Full Implementation)</option>
+                    <option value="Expert">Expert (Architecture & Problem Solving)</option>
+                  </select>
+                </div>
+                <button type="submit" class="btn-primary">
+                  <i class="fa-solid fa-save"></i> Save to Database
+                </button>
+              </form>
+
+              <hr class="form-divider">
+
+              <!-- Or Create Brand New Skill -->
+              <h4>Don't see your skill? Create New Skill</h4>
+              <form id="create-new-skill-form" onsubmit="handleCreateNewSkill(event)" class="mt-2">
+                <div class="form-row">
+                  <input type="text" id="new-skill-name" class="form-control" placeholder="Skill name (e.g. Flutter, Rust)" required>
+                  <select id="new-skill-category" class="form-control" required>
+                    <option value="Programming">Programming</option>
+                    <option value="Database">Database</option>
+                    <option value="Web Development">Web Development</option>
+                    <option value="AI / Data Science">AI / Data Science</option>
+                    <option value="Design">Design</option>
+                    <option value="Security">Security</option>
+                    <option value="Soft Skills">Soft Skills</option>
+                  </select>
+                </div>
+                <button type="submit" class="btn-secondary mt-2">
+                  <i class="fa-solid fa-plus"></i> Add to Master Skills Table
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Current Student Skills List -->
+          <div class="card">
+            <div class="card-header">
+              <h3><i class="fa-solid fa-list-check"></i> Current Skills in SQLite</h3>
+            </div>
+            <div class="card-body">
+              <table class="table" id="skills-table">
+                <thead>
+                  <tr>
+                    <th>Skill Name</th>
+                    <th>Category</th>
+                    <th>Proficiency</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="skills-table-body">
+                  <!-- Dynamically populated -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: MY PROFILE -->
+      <section id="tab-my-profile" class="content-tab">
+        <div class="section-header">
+          <div>
+            <h2>My Student Profile</h2>
+            <p class="subtitle">View and edit your profile in the SQLite `students` table</p>
+          </div>
+        </div>
+
+        <div class="card" style="max-width: 780px;">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-user-pen"></i> Edit Profile Details</h3>
+          </div>
+          <div class="card-body">
+            <form id="profile-form" onsubmit="handleUpdateProfile(event)">
+              <div class="form-group">
+                <label for="prof-name">Full Name</label>
+                <input type="text" id="prof-name" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="prof-email">College Email (Unique Key)</label>
+                <input type="email" id="prof-email" class="form-control" required>
+              </div>
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label for="prof-dept">Department</label>
+                  <select id="prof-dept" class="form-control" required>
+                    <option value="Computer Science">Computer Science</option>
+                    <option value="Information Technology">Information Technology</option>
+                    <option value="Data Science">Data Science</option>
+                    <option value="Cyber Security">Cyber Security</option>
+                    <option value="Design & Computing">Design & Computing</option>
+                  </select>
+                </div>
+                <div class="form-group flex-1">
+                  <label for="prof-year">Year</label>
+                  <select id="prof-year" class="form-control" required>
+                    <option value="1">1st Year</option>
+                    <option value="2">2nd Year</option>
+                    <option value="3">3rd Year</option>
+                    <option value="4">4th Year</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="prof-availability">Availability</label>
+                <select id="prof-availability" class="form-control" required>
+                  <option value="High">High (Dedicated 15+ hrs/week)</option>
+                  <option value="Medium">Medium (10 hrs/week)</option>
+                  <option value="Low">Low (Exam / Coursework heavy)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="prof-interests">Interests & Specializations (Keywords for affinity matching)</label>
+                <input type="text" id="prof-interests" class="form-control" placeholder="e.g. Relational Databases, Web UI, Machine Learning" required>
+                <small class="form-text">Used by the recommendation engine to calculate interest affinity scores.</small>
+              </div>
+              <button type="submit" class="btn-primary">
+                <i class="fa-solid fa-floppy-disk"></i> Update Profile in SQLite
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 5: SKILL GRAPH -->
+      <section id="tab-skill-graph" class="content-tab">
+        <div class="section-header">
+          <div>
+            <h2>NetworkX Skill Graph</h2>
+            <p class="subtitle">Tripartite graph: Students ↔ Skills ↔ Projects with degree centrality and edge weights</p>
+          </div>
+          <div class="graph-legend">
+            <span class="legend-item"><span class="dot student-dot"></span> Student (Diamond)</span>
+            <span class="legend-item"><span class="dot skill-dot"></span> Skill (Dot)</span>
+            <span class="legend-item"><span class="dot project-dot"></span> Project (Box)</span>
+          </div>
+        </div>
+
+        <!-- Graph Controls & Stats Bar -->
+        <div class="graph-toolbar">
+          <div class="btn-group">
+            <button class="btn-filter active" onclick="filterGraph('all')">All Nodes</button>
+            <button class="btn-filter" onclick="filterGraph('students-skills')">Students & Skills</button>
+            <button class="btn-filter" onclick="filterGraph('projects-skills')">Projects & Skills</button>
+          </div>
+          <div class="graph-search">
+            <input type="text" id="graph-search-input" placeholder="Search student or skill..." oninput="handleGraphSearch()">
+          </div>
+          <div class="graph-kpis">
+            <span>Nodes: <strong id="graph-node-count">0</strong></span>
+            <span>Edges: <strong id="graph-edge-count">0</strong></span>
+            <span>Density: <strong id="graph-density">0</strong></span>
+          </div>
+        </div>
+
+        <!-- Canvas for Vis-Network Graph -->
+        <div class="graph-container-card">
+          <div id="network-canvas"></div>
+          
+          <!-- Node Inspector Overlay -->
+          <div id="node-inspector" class="node-inspector hidden">
+            <div class="inspector-header">
+              <h4 id="inspector-title">Node Details</h4>
+              <button class="btn-close" onclick="closeInspector()">×</button>
+            </div>
+            <div id="inspector-content" class="inspector-body">
+              Click any node in the graph to inspect its properties.
+            </div>
+          </div>
+        </div>
+
+        <!-- Centrality Table from NetworkX -->
+        <div class="card mt-4">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-chart-line"></i> NetworkX Top Central Competencies (Degree Centrality)</h3>
+          </div>
+          <div class="card-body">
+            <div id="centrality-badges" class="skills-pill-container">
+              <!-- Loaded from NetworkX analysis -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 6: PROJECTS -->
+      <section id="tab-projects" class="content-tab">
+        <div class="section-header">
+          <div>
+            <h2 id="projects-tab-title">Academic Projects</h2>
+            <p class="subtitle" id="projects-tab-sub">Faculty capstone projects with skill prerequisites and team size targets</p>
+          </div>
+          <button class="btn-primary role-faculty-only" onclick="switchTab('create-project')">
+            <i class="fa-solid fa-plus"></i> Create New Project
+          </button>
+          <div class="role-student-only student-tagline-badge">
+            <i class="fa-solid fa-graduation-cap"></i> Student View • Browse open projects & evaluate match
+          </div>
+        </div>
+
+        <!-- Faculty Project & Approved Teams Overview Banner -->
+        <div class="role-faculty-only mb-4" id="faculty-projects-kpi-bar">
+          <div class="grid-4-col">
+            <div class="stat-card" style="padding: 14px;">
+              <div class="stat-icon purple" style="width: 38px; height: 38px; font-size: 16px;"><i class="fa-solid fa-folder-open"></i></div>
+              <div class="stat-details">
+                <span class="stat-label">Total Projects</span>
+                <h3 id="fac-proj-total" style="font-size: 20px;">0</h3>
+              </div>
+            </div>
+            <div class="stat-card" style="padding: 14px;">
+              <div class="stat-icon green" style="width: 38px; height: 38px; font-size: 16px;"><i class="fa-solid fa-circle-check"></i></div>
+              <div class="stat-details">
+                <span class="stat-label">Approved Teams</span>
+                <h3 id="fac-proj-approved-teams" style="font-size: 20px;">0</h3>
+              </div>
+            </div>
+            <div class="stat-card" style="padding: 14px;">
+              <div class="stat-icon blue" style="width: 38px; height: 38px; font-size: 16px;"><i class="fa-solid fa-user-check"></i></div>
+              <div class="stat-details">
+                <span class="stat-label">Students Allocated</span>
+                <h3 id="fac-proj-students-allocated" style="font-size: 20px;">0</h3>
+              </div>
+            </div>
+            <div class="stat-card" style="padding: 14px;">
+              <div class="stat-icon amber" style="width: 38px; height: 38px; font-size: 16px;"><i class="fa-solid fa-hourglass-half"></i></div>
+              <div class="stat-details">
+                <span class="stat-label">Pending Allocation</span>
+                <h3 id="fac-proj-pending" style="font-size: 20px;">0</h3>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="projects-container" class="projects-grid">
+          <!-- Loaded dynamically from SQLite projects and project_skills -->
+        </div>
+      </section>
+
+      <!-- TAB 7: TEAM RECOMMENDATION -->
+      <section id="tab-recommendations" class="content-tab">
+        <div class="section-header">
+          <div>
+            <h2>Rule-Based Team Builder</h2>
+            <p class="subtitle">Transparent Python heuristic matching algorithm maximizing complementary skill coverage</p>
+          </div>
+        </div>
+
+        <!-- Project Selector Card -->
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-sliders"></i> Select Project to Form Teams</h3>
+          </div>
+          <div class="card-body">
+            <div class="form-row align-end">
+              <div class="form-group flex-2">
+                <label for="rec-project-select">Target Project</label>
+                <select id="rec-project-select" class="form-control" onchange="loadProjectRequirementsPreview()">
+                  <option value="">-- Choose Project --</option>
+                </select>
+              </div>
+              <div class="form-group flex-1">
+                <button class="btn-primary btn-block" onclick="triggerRecommendation()">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Teams
+                </button>
+              </div>
+            </div>
+
+            <!-- Target Project Skill Preview -->
+            <div id="rec-project-preview" class="mt-3 hidden">
+              <h4>Required Skill Prerequisites:</h4>
+              <div id="rec-preview-skills" class="skills-pill-container mt-1"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recommendation Output Area -->
+        <div id="recommendation-results" class="mt-4">
+          <!-- Populated with proposed teams -->
+          <div class="empty-state">
+            <i class="fa-solid fa-robot-astronomer icon-empty"></i>
+            <h3>Select a project above and click "Generate Teams"</h3>
+            <p>The Python backend will query candidate student skills from SQLite, evaluate proficiencies, avoid skill redundancies, and propose balanced teams.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 8: FACULTY DASHBOARD -->
+      <section id="tab-faculty-dash" class="content-tab">
+        <div class="section-header">
+          <div>
+            <h2>Faculty Analytics Dashboard</h2>
+            <p class="subtitle">College-wide student skill distributions and project coverage metrics</p>
+          </div>
+          <button class="btn-primary" onclick="switchTab('create-project')">
+            <i class="fa-solid fa-plus"></i> Post Project
+          </button>
+        </div>
+
+        <!-- KPI Metrics -->
+        <div class="grid-4-col">
+          <div class="stat-card">
+            <div class="stat-icon blue"><i class="fa-solid fa-users"></i></div>
+            <div class="stat-details">
+              <span class="stat-label">Total Students</span>
+              <h3 id="fac-students-count">0</h3>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon green"><i class="fa-solid fa-certificate"></i></div>
+            <div class="stat-details">
+              <span class="stat-label">Total Skills</span>
+              <h3 id="fac-skills-count">0</h3>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon purple"><i class="fa-solid fa-folder-tree"></i></div>
+            <div class="stat-details">
+              <span class="stat-label">Active Projects</span>
+              <h3 id="fac-projects-count">0</h3>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon amber"><i class="fa-solid fa-thumbs-up"></i></div>
+            <div class="stat-details">
+              <span class="stat-label">Approved Teams</span>
+              <h3 id="fac-teams-count">0</h3>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chart.js Visualizations -->
+        <div class="grid-2-col mt-4">
+          <div class="card">
+            <div class="card-header">
+              <h3><i class="fa-solid fa-chart-column"></i> Most Common Skills (Student Count)</h3>
+            </div>
+            <div class="card-body">
+              <div class="chart-container">
+                <canvas id="chart-skills-dist"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3><i class="fa-solid fa-chart-pie"></i> Skills by Category</h3>
+            </div>
+            <div class="card-body">
+              <div class="chart-container">
+                <canvas id="chart-categories-dist"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Teams Created Table -->
+        <div class="card mt-4">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-list"></i> Formed & Approved Teams in Database</h3>
+          </div>
+          <div class="card-body">
+            <table class="table" id="all-teams-table">
+              <thead>
+                <tr>
+                  <th>Team ID</th>
+                  <th>Team Name</th>
+                  <th>Project Name</th>
+                  <th>Coverage %</th>
+                  <th>Members</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="all-teams-tbody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: STUDENT ROSTER (FACULTY ONLY) -->
+      <section id="tab-student-roster" class="content-tab">
+        <div class="section-header">
+          <div>
+            <h2>Student Directory & Skill Profiles</h2>
+            <p class="subtitle">Inspect college-wide student competencies, availability, and active team memberships</p>
+          </div>
+          <div class="form-group" style="margin: 0;">
+            <input type="text" id="roster-search-input" class="form-control" placeholder="Search student by name, dept, or skill..." oninput="handleRosterSearch()" style="min-width: 280px;">
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-users-viewfinder"></i> Student Roster (SQLite Records)</h3>
+          </div>
+          <div class="card-body">
+            <div id="roster-container" class="grid-2-col">
+              <!-- Dynamically populated from /api/students -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 9: CREATE PROJECT -->
+      <section id="tab-create-project" class="content-tab">
+        <div class="section-header">
+          <div>
+            <h2>Create New Project</h2>
+            <p class="subtitle">Define project requirements, team size, and required competencies with importance weights</p>
+          </div>
+        </div>
+
+        <div class="card max-w-800">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-folder-plus"></i> Project Specifications Form</h3>
+          </div>
+          <div class="card-body">
+            <form id="create-project-form" onsubmit="handleCreateProject(event)">
+              <div class="form-group">
+                <label for="proj-name">Project Title</label>
+                <input type="text" id="proj-name" class="form-control" placeholder="e.g. Autonomous Drone Navigation System" required>
+              </div>
+
+              <div class="form-group">
+                <label for="proj-desc">Project Description</label>
+                <textarea id="proj-desc" class="form-control" rows="3" placeholder="Brief outline of the deliverables, tech stack, and goals..." required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="proj-team-size">Required Team Size</label>
+                <input type="number" id="proj-team-size" class="form-control" min="2" max="6" value="4" required>
+              </div>
+
+              <div class="form-section-header">
+                <h4>Required Competencies & Importance Levels</h4>
+                <button type="button" class="btn-sm btn-outline" onclick="addProjectSkillRow()">
+                  <i class="fa-solid fa-plus"></i> Add Another Skill
+                </button>
+              </div>
+
+              <div id="project-skills-rows" class="mt-2">
+                <!-- Dynamic rows for skill selection -->
+              </div>
+
+              <div class="mt-4">
+                <button type="submit" class="btn-primary">
+                  <i class="fa-solid fa-check"></i> Save Project & Skills to SQLite
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 10: DBMS & SQL VIVA SHOWCASE -->
+      <section id="tab-dbms-showcase" class="content-tab">
+        <div class="section-header">
+          <div>
+            <h2>DBMS Concepts & Live SQL Inspector</h2>
+            <p class="subtitle">Demonstrate relational database theory, schema design, and live SQL queries during college viva</p>
+          </div>
+        </div>
+
+        <!-- Relational Schema ER Highlights -->
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-sitemap"></i> Relational Database Schema (7 SQLite Tables)</h3>
+          </div>
+          <div class="card-body">
+            <div class="dbms-schema-grid" id="dbms-schema-grid">
+              <!-- Dynamically loaded from /api/dbms-showcase -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Key SQL JOINs Demonstrated -->
+        <div class="card mt-4">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-code-merge"></i> Key SQL JOIN Queries Implemented in Backend</h3>
+          </div>
+          <div class="card-body">
+            <div id="dbms-joins-list">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Interactive SQL Query Console -->
+        <div class="card mt-4">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-terminal"></i> Viva Examiner Interactive SQL Console</h3>
+          </div>
+          <div class="card-body">
+            <p class="text-muted">Type any SELECT query to inspect real-time tables in <code>skills.db</code>:</p>
+            <div class="sql-console-input">
+              <textarea id="custom-sql-input" class="form-control font-mono" rows="3">SELECT s.name, s.department, sk.skill_name, ss.proficiency
+FROM students s
+INNER JOIN student_skills ss ON s.student_id = ss.student_id
+INNER JOIN skills sk ON ss.skill_id = sk.skill_id
+LIMIT 6;</textarea>
+              <button class="btn-primary mt-2" onclick="runCustomSql()">
+                <i class="fa-solid fa-play"></i> Execute SQL
+              </button>
+            </div>
+            
+            <div id="sql-console-output" class="mt-3">
+              <!-- Results table -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Student Profile Switcher Modal -->
+  <div id="role-modal" class="modal-backdrop hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="modal-switcher-title"><i class="fa-solid fa-users"></i> Switch Student Demo Profile</h3>
+        <button class="btn-close" onclick="closeRoleSwitcherModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted">Select any verified student profile in SQLite to inspect their specific skills, availability, and matched recommendations:</p>
+        
+        <div id="student-picker-section" class="mt-3">
+          <label for="student-picker-select"><strong>Active Student Account:</strong></label>
+          <select id="student-picker-select" class="form-control mt-1" onchange="setStudent(this.value)">
+            <!-- Populated with sample students -->
+          </select>
+        </div>
+
+        <div class="callout callout-info mt-4" style="border-left: 3px solid var(--accent); background: rgba(139, 92, 246, 0.08); padding: 12px; border-radius: var(--radius-sm);">
+          <div style="display: flex; gap: 10px; align-items: flex-start;">
+            <i class="fa-solid fa-shield-halved" style="color: var(--accent); margin-top: 3px;"></i>
+            <div>
+              <strong style="color: var(--text-primary); font-size: 13px;">Role Separation:</strong>
+              <p class="text-muted" style="margin-top: 4px; font-size: 12px; line-height: 1.4;">
+                Faculty features (Analytics, Project Creation, Team Approvals) are strictly isolated and require logging out to switch to faculty credentials.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Application Logic -->
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

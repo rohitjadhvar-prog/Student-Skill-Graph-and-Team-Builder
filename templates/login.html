@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Student Skill Graph & Team Builder</title>
+  
+  <!-- Inter Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Application CSS -->
+  <link rel="stylesheet" href="/static/css/style.css">
+  
+  <style>
+    .login-wrapper {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px;
+      background: radial-gradient(circle at top, #1E293B 0%, #0F172A 70%);
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 520px;
+    }
+
+    .login-brand {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .login-brand .brand-icon {
+      margin: 0 auto 12px;
+      width: 52px;
+      height: 52px;
+      font-size: 24px;
+    }
+
+    .login-brand h1 {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text-primary);
+      letter-spacing: -0.5px;
+    }
+
+    .login-brand .tagline {
+      font-size: 13px;
+      color: var(--primary);
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .login-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+
+    .login-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-primary);
+    }
+
+    .login-tab-btn {
+      flex: 1;
+      padding: 14px;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .login-tab-btn:hover {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .login-tab-btn.active {
+      color: var(--primary);
+      background: var(--bg-surface);
+      border-bottom: 2px solid var(--primary);
+    }
+
+    .login-body {
+      padding: 24px;
+    }
+
+    .login-section {
+      display: none;
+    }
+
+    .login-section.active {
+      display: block;
+    }
+
+    .demo-accounts-box {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .demo-accounts-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .demo-chips {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .demo-chip {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.15s ease;
+    }
+
+    .demo-chip:hover {
+      border-color: var(--primary);
+      background: var(--bg-surface-elevated);
+      transform: translateY(-1px);
+    }
+
+    .demo-chip-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .demo-chip-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-full);
+      background: var(--primary-light);
+      color: var(--primary);
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .demo-chip-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .demo-chip-meta {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .demo-chip-action {
+      font-size: 11px;
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .login-footer-links {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .login-footer-links a {
+      color: var(--primary);
+      font-weight: 600;
+      margin: 0 8px;
+    }
+
+    .login-footer-links a:hover {
+      text-decoration: underline;
+    }
+
+    .auth-alert {
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .auth-alert.error {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #F87171;
+    }
+
+    .auth-alert.success {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34D399;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-wrapper">
+    <div class="login-container">
+      
+      <!-- Brand & Header -->
+      <div class="login-brand">
+        <div class="brand-icon">
+          <i class="fa-solid fa-diagram-project"></i>
+        </div>
+        <h1>Student Skill Graph</h1>
+        <p class="tagline">“Turn scattered student skills into balanced, project-ready teams.”</p>
+      </div>
+
+      <!-- Main Login Card -->
+      <div class="login-card">
+        
+        <!-- Tabs: Student / Faculty / Register -->
+        <div class="login-tabs">
+          <button class="login-tab-btn active" id="tab-btn-student" onclick="showLoginTab('student')">
+            <i class="fa-solid fa-user-graduate"></i> Student Login
+          </button>
+          <button class="login-tab-btn" id="tab-btn-faculty" onclick="showLoginTab('faculty')">
+            <i class="fa-solid fa-chalkboard-user"></i> Faculty Login
+          </button>
+          <button class="login-tab-btn" id="tab-btn-register" onclick="showLoginTab('register')">
+            <i class="fa-solid fa-user-plus"></i> Register
+          </button>
+        </div>
+
+        <div class="login-body">
+          
+          <!-- Alert Box -->
+          <div id="auth-alert" class="auth-alert hidden"></div>
+
+          <!-- SECTION 1: STUDENT LOGIN -->
+          <div id="section-student" class="login-section active">
+            <form id="student-login-form" onsubmit="handleStudentLogin(event)">
+              <div class="form-group">
+                <label for="student-email">College Email Address</label>
+                <div class="form-row">
+                  <input type="email" id="student-email" class="form-control" placeholder="aditya@college.edu" required>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="student-password">Password</label>
+                <input type="password" id="student-password" class="form-control" value="student123" required>
+                <small class="form-text">Demo password: <code>student123</code> (or click any sample account below)</small>
+              </div>
+
+              <button type="submit" class="btn-primary btn-block mt-3">
+                <i class="fa-solid fa-arrow-right-to-bracket"></i> Login as Student
+              </button>
+            </form>
+
+            <!-- Sample Student Accounts (One-Click Login) -->
+            <div class="demo-accounts-box">
+              <div class="demo-accounts-title">
+                <span>Sample Student Accounts (1-Click Login)</span>
+                <span class="badge-role">Demo Data</span>
+              </div>
+              <div class="demo-chips">
+                <div class="demo-chip" onclick="quickLoginStudent('aditya@college.edu')">
+                  <div class="demo-chip-left">
+                    <div class="demo-chip-avatar">AS</div>
+                    <div>
+                      <div class="demo-chip-name">Aditya Sharma</div>
+                      <div class="demo-chip-meta">CS (Yr 2) • Python & SQL Expert</div>
+                    </div>
+                  </div>
+                  <span class="demo-chip-action">Login <i class="fa-solid fa-chevron-right"></i></span>
+                </div>
+
+                <div class="demo-chip" onclick="quickLoginStudent('rohit@college.edu')">
+                  <div class="demo-chip-left">
+                    <div class="demo-chip-avatar">RV</div>
+                    <div>
+                      <div class="demo-chip-name">Rohit Verma</div>
+                      <div class="demo-chip-meta">IT (Yr 2) • Database & Relational DBMS</div>
+                    </div>
+                  </div>
+                  <span class="demo-chip-action">Login <i class="fa-solid fa-chevron-right"></i></span>
+                </div>
+
+                <div class="demo-chip" onclick="quickLoginStudent('sneha@college.edu')">
+                  <div class="demo-chip-left">
+                    <div class="demo-chip-avatar">SP</div>
+                    <div>
+                      <div class="demo-chip-name">Sneha Patel</div>
+                      <div class="demo-chip-meta">Data Science (Yr 3) • ML & Analytics</div>
+                    </div>
+                  </div>
+                  <span class="demo-chip-action">Login <i class="fa-solid fa-chevron-right"></i></span>
+                </div>
+
+                <div class="demo-chip" onclick="quickLoginStudent('aryan@college.edu')">
+                  <div class="demo-chip-left">
+                    <div class="demo-chip-avatar">AG</div>
+                    <div>
+                      <div class="demo-chip-name">Aryan Gupta</div>
+                      <div class="demo-chip-meta">CS (Yr 3) • UI/UX & React Frontend</div>
+                    </div>
+                  </div>
+                  <span class="demo-chip-action">Login <i class="fa-solid fa-chevron-right"></i></span>
+                </div>
+
+                <div class="demo-chip" onclick="quickLoginStudent('meera@college.edu')">
+                  <div class="demo-chip-left">
+                    <div class="demo-chip-avatar">MR</div>
+                    <div>
+                      <div class="demo-chip-name">Meera Rao</div>
+                      <div class="demo-chip-meta">Design & Computing (Yr 3) • HCI & UI</div>
+                    </div>
+                  </div>
+                  <span class="demo-chip-action">Login <i class="fa-solid fa-chevron-right"></i></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION 2: FACULTY LOGIN -->
+          <div id="section-faculty" class="login-section">
+            <form id="faculty-login-form" onsubmit="handleFacultyLogin(event)">
+              <div class="form-group">
+                <label for="faculty-email">Faculty Email Address</label>
+                <input type="email" id="faculty-email" class="form-control" value="faculty@college.edu" required>
+              </div>
+
+              <div class="form-group">
+                <label for="faculty-password">Password</label>
+                <input type="password" id="faculty-password" class="form-control" value="faculty123" required>
+                <small class="form-text">Demo password: <code>faculty123</code></small>
+              </div>
+
+              <button type="submit" class="btn-primary btn-block mt-3">
+                <i class="fa-solid fa-arrow-right-to-bracket"></i> Login as Faculty Member
+              </button>
+            </form>
+
+            <!-- Sample Faculty Accounts (From SQLite) -->
+            <div class="demo-accounts-box">
+              <div class="demo-accounts-title">
+                <span>Faculty Accounts in SQLite (1-Click Login)</span>
+                <span class="badge-role" style="background: rgba(139, 92, 246, 0.2); color: var(--accent);">Evaluator</span>
+              </div>
+              <div class="demo-chips">
+                {% if faculty_members %}
+                  {% for f in faculty_members %}
+                  <div class="demo-chip" onclick="quickLoginFaculty('{{ f.email }}')">
+                    <div class="demo-chip-left">
+                      <div class="demo-chip-avatar" style="background: rgba(139, 92, 246, 0.2); color: var(--accent);">
+                        {{ f.name[:2].upper() }}
+                      </div>
+                      <div>
+                        <div class="demo-chip-name">{{ f.name }}</div>
+                        <div class="demo-chip-meta">{{ f.department }} • {{ f.designation }}</div>
+                      </div>
+                    </div>
+                    <span class="demo-chip-action">Login <i class="fa-solid fa-chevron-right"></i></span>
+                  </div>
+                  {% endfor %}
+                {% else %}
+                  <div class="demo-chip" onclick="quickLoginFaculty('faculty@college.edu')">
+                    <div class="demo-chip-left">
+                      <div class="demo-chip-avatar" style="background: rgba(139, 92, 246, 0.2); color: var(--accent);">SK</div>
+                      <div>
+                        <div class="demo-chip-name">Dr. S. K. Raman</div>
+                        <div class="demo-chip-meta">Faculty Advisor • Project Evaluator</div>
+                      </div>
+                    </div>
+                    <span class="demo-chip-action">Login <i class="fa-solid fa-chevron-right"></i></span>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION 3: REGISTRATION (STUDENT & FACULTY) -->
+          <div id="section-register" class="login-section">
+            
+            <!-- Registration Type Switcher -->
+            <div style="display: flex; gap: 8px; margin-bottom: 20px; background: var(--bg-primary); padding: 4px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+              <button type="button" class="btn-filter flex-1 active" id="btn-reg-student" onclick="toggleRegType('student')" style="padding: 9px; text-align: center;">
+                <i class="fa-solid fa-user-graduate"></i> Register Student
+              </button>
+              <button type="button" class="btn-filter flex-1" id="btn-reg-faculty" onclick="toggleRegType('faculty')" style="padding: 9px; text-align: center;">
+                <i class="fa-solid fa-chalkboard-user"></i> Register Faculty
+              </button>
+            </div>
+
+            <!-- Student Registration Form -->
+            <form id="student-reg-form" onsubmit="handleStudentRegister(event)">
+              <div class="form-group">
+                <label for="reg-name">Student Full Name</label>
+                <input type="text" id="reg-name" class="form-control" placeholder="e.g. Tarun Kumar" required>
+              </div>
+
+              <div class="form-group">
+                <label for="reg-email">College Email (Unique Key)</label>
+                <input type="email" id="reg-email" class="form-control" placeholder="tarun@college.edu" required>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label for="reg-dept">Department</label>
+                  <select id="reg-dept" class="form-control" required>
+                    <option value="Computer Science">Computer Science</option>
+                    <option value="Information Technology">Information Technology</option>
+                    <option value="Data Science">Data Science</option>
+                    <option value="Cyber Security">Cyber Security</option>
+                    <option value="Design & Computing">Design & Computing</option>
+                  </select>
+                </div>
+                <div class="form-group flex-1">
+                  <label for="reg-year">Year</label>
+                  <select id="reg-year" class="form-control" required>
+                    <option value="1">1st Year</option>
+                    <option value="2" selected>2nd Year</option>
+                    <option value="3">3rd Year</option>
+                    <option value="4">4th Year</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="reg-avail">Availability</label>
+                <select id="reg-avail" class="form-control" required>
+                  <option value="High" selected>High (15+ hrs/week)</option>
+                  <option value="Medium">Medium (10 hrs/week)</option>
+                  <option value="Low">Low</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="reg-interests">Interests & Specializations</label>
+                <input type="text" id="reg-interests" class="form-control" placeholder="e.g. Full-stack Python, Cloud Databases" required>
+              </div>
+
+              <div class="form-group">
+                <label for="reg-password">Set Account Password</label>
+                <input type="password" id="reg-password" class="form-control" placeholder="Create your login password (e.g. mypass123)" required>
+                <small class="form-text">Will be saved to SQLite <code>students.password</code> for secure login.</small>
+              </div>
+
+              <button type="submit" class="btn-primary btn-block mt-3">
+                <i class="fa-solid fa-user-plus"></i> Register Student & Enter Dashboard
+              </button>
+            </form>
+
+            <!-- Faculty Registration Form -->
+            <form id="faculty-reg-form" class="hidden" onsubmit="handleFacultyRegister(event)">
+              <div class="form-group">
+                <label for="fac-name">Faculty Name & Title</label>
+                <input type="text" id="fac-name" class="form-control" placeholder="e.g. Dr. Priya Sharma" required>
+              </div>
+
+              <div class="form-group">
+                <label for="fac-email">College Email (Unique Key)</label>
+                <input type="email" id="fac-email" class="form-control" placeholder="priya.sharma@college.edu" required>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label for="fac-dept">Department</label>
+                  <select id="fac-dept" class="form-control" required>
+                    <option value="Computer Science & Engineering">Computer Science & Engineering</option>
+                    <option value="Information Technology">Information Technology</option>
+                    <option value="Data Science & AI">Data Science & AI</option>
+                    <option value="Cyber Security">Cyber Security</option>
+                    <option value="Software Systems">Software Systems</option>
+                  </select>
+                </div>
+                <div class="form-group flex-1">
+                  <label for="fac-desig">Designation</label>
+                  <select id="fac-desig" class="form-control" required>
+                    <option value="Professor">Professor</option>
+                    <option value="Associate Professor">Associate Professor</option>
+                    <option value="Assistant Professor" selected>Assistant Professor</option>
+                    <option value="HOD & Professor">HOD & Professor</option>
+                    <option value="Project Coordinator">Project Coordinator</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="fac-password">Password</label>
+                <input type="password" id="fac-password" class="form-control" value="faculty123" required>
+                <small class="form-text">Demonstrates immediate DBMS <code>INSERT INTO faculty</code>.</small>
+              </div>
+
+              <button type="submit" class="btn-primary btn-block mt-3" style="background: var(--accent);">
+                <i class="fa-solid fa-chalkboard-user"></i> Register Faculty & Enter Dashboard
+              </button>
+            </form>
+
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Footer note -->
+      <div class="login-footer-links">
+        <span><i class="fa-solid fa-graduation-cap"></i> Student Skill Graph & Team Builder • Academic Portal</span>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    function showLoginTab(tab) {
+      document.querySelectorAll(".login-tab-btn").forEach(btn => btn.classList.remove("active"));
+      document.querySelectorAll(".login-section").forEach(sec => sec.classList.remove("active"));
+      hideAlert();
+
+      if (tab === "student") {
+        document.getElementById("tab-btn-student").classList.add("active");
+        document.getElementById("section-student").classList.add("active");
+      } else if (tab === "faculty") {
+        document.getElementById("tab-btn-faculty").classList.add("active");
+        document.getElementById("section-faculty").classList.add("active");
+      } else if (tab === "register") {
+        document.getElementById("tab-btn-register").classList.add("active");
+        document.getElementById("section-register").classList.add("active");
+      }
+    }
+
+    function toggleRegType(type) {
+      hideAlert();
+      const studentBtn = document.getElementById("btn-reg-student");
+      const facultyBtn = document.getElementById("btn-reg-faculty");
+      const studentForm = document.getElementById("student-reg-form");
+      const facultyForm = document.getElementById("faculty-reg-form");
+
+      if (type === "student") {
+        studentBtn.classList.add("active");
+        facultyBtn.classList.remove("active");
+        studentForm.classList.remove("hidden");
+        facultyForm.classList.add("hidden");
+      } else {
+        facultyBtn.classList.add("active");
+        studentBtn.classList.remove("active");
+        facultyForm.classList.remove("hidden");
+        studentForm.classList.add("hidden");
+      }
+    }
+
+    function showAlert(msg, type = "error") {
+      const el = document.getElementById("auth-alert");
+      el.className = `auth-alert ${type}`;
+      el.innerHTML = `<i class="fa-solid ${type === 'error' ? 'fa-triangle-exclamation' : 'fa-circle-check'}"></i> ${msg}`;
+      el.classList.remove("hidden");
+    }
+
+    function hideAlert() {
+      document.getElementById("auth-alert").classList.add("hidden");
+    }
+
+    async function handleStudentLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById("student-email").value.trim();
+      const password = document.getElementById("student-password").value;
+      await performLogin("student", email, password);
+    }
+
+    async function handleFacultyLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById("faculty-email").value.trim();
+      const password = document.getElementById("faculty-password").value;
+      await performLogin("faculty", email, password);
+    }
+
+    function quickLoginStudent(email) {
+      document.getElementById("student-email").value = email;
+      performLogin("student", email, "student123");
+    }
+
+    function quickLoginFaculty(email = "faculty@college.edu") {
+      document.getElementById("faculty-email").value = email;
+      performLogin("faculty", email, "faculty123");
+    }
+
+    async function performLogin(role, email, password) {
+      hideAlert();
+      try {
+        const res = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ role, email, password })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          showAlert(`Welcome back, ${data.user.name || 'User'}! Redirecting...`, "success");
+          setTimeout(() => {
+            window.location.href = data.redirect || "/";
+          }, 400);
+        } else {
+          showAlert(data.error || "Authentication failed. Please check your credentials.", "error");
+        }
+      } catch (err) {
+        showAlert("Server connection error during login.", "error");
+      }
+    }
+
+    async function handleStudentRegister(e) {
+      e.preventDefault();
+      hideAlert();
+      const payload = {
+        name: document.getElementById("reg-name").value.trim(),
+        email: document.getElementById("reg-email").value.trim(),
+        department: document.getElementById("reg-dept").value,
+        year: parseInt(document.getElementById("reg-year").value),
+        availability: document.getElementById("reg-avail").value,
+        interests: document.getElementById("reg-interests").value.trim(),
+        password: document.getElementById("reg-password").value.trim()
+      };
+
+      try {
+        const res = await fetch("/api/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          showAlert("Student registration successful! Redirecting...", "success");
+          setTimeout(() => {
+            window.location.href = data.redirect || "/#student-dash";
+          }, 500);
+        } else {
+          showAlert(data.error || "Failed to register profile", "error");
+        }
+      } catch (err) {
+        showAlert("Server error during registration", "error");
+      }
+    }
+
+    async function handleFacultyRegister(e) {
+      e.preventDefault();
+      hideAlert();
+      const payload = {
+        name: document.getElementById("fac-name").value.trim(),
+        email: document.getElementById("fac-email").value.trim(),
+        department: document.getElementById("fac-dept").value,
+        designation: document.getElementById("fac-desig").value,
+        password: document.getElementById("fac-password").value
+      };
+
+      try {
+        const res = await fetch("/api/register-faculty", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          showAlert("Faculty registration successful in SQLite! Redirecting...", "success");
+          setTimeout(() => {
+            window.location.href = data.redirect || "/#faculty-dash";
+          }, 500);
+        } else {
+          showAlert(data.error || "Failed to register faculty profile", "error");
+        }
+      } catch (err) {
+        showAlert("Server error during registration", "error");
+      }
+    }
+  </script>
+</body>
+</html>

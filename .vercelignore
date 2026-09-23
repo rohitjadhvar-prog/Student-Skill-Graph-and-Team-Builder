@@ -1,0 +1,8 @@
+__pycache__
+*.pyc
+.pytest_cache
+test_app.py
+.git
+.github
+.vscode
+.agents
