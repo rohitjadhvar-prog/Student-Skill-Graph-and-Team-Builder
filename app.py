@@ -26,20 +26,36 @@ app = Flask(
 )
 app.secret_key = "college_project_secret_key_student_skills_graph"
 
+from urllib.parse import unquote
+
 # WSGI Middleware to restore original request URL on Vercel
 class VercelPathMiddleware:
     """
     WSGI middleware for Vercel serverless deployments.
-    Restores the original request URL from HTTP_X_MATCHED_PATH,
+    Restores the original request URL from __path__ query param or HTTP_X_MATCHED_PATH,
     preventing infinite redirect loops caused by Vercel rewrite destinations.
     """
     def __init__(self, wsgi_app):
         self.wsgi_app = wsgi_app
 
     def __call__(self, environ, start_response):
-        matched = environ.get("HTTP_X_MATCHED_PATH") or environ.get("HTTP_X_FORWARDED_URI") or environ.get("HTTP_X_REWRITE_URL")
-        if matched:
-            environ["PATH_INFO"] = matched.split("?")[0]
+        qs = environ.get("QUERY_STRING", "")
+        if "__path__=" in qs:
+            params = []
+            for part in qs.split("&"):
+                if part.startswith("__path__="):
+                    raw_path = unquote(part.split("=", 1)[1])
+                    if not raw_path.startswith("/"):
+                        raw_path = "/" + raw_path
+                    environ["PATH_INFO"] = raw_path
+                elif part:
+                    params.append(part)
+            environ["QUERY_STRING"] = "&".join(params)
+        elif environ.get("HTTP_X_MATCHED_PATH"):
+            environ["PATH_INFO"] = environ.get("HTTP_X_MATCHED_PATH").split("?")[0]
+        elif environ.get("HTTP_X_FORWARDED_URI"):
+            environ["PATH_INFO"] = environ.get("HTTP_X_FORWARDED_URI").split("?")[0]
+
         return self.wsgi_app(environ, start_response)
 
 app.wsgi_app = VercelPathMiddleware(app.wsgi_app)
@@ -64,9 +80,7 @@ def index():
 @app.route("/login.html")
 @app.route("/login")
 def login_page():
-    """Renders the dedicated Student and Faculty Login page."""
-    if session.get("logged_in"):
-        return redirect(url_for("index"))
+    """Renders the dedicated Student and Faculty Login page without redirecting."""
     students = db.get_all_students()
     faculty_members = db.get_all_faculty()
     return render_template("login.html", students=students, faculty_members=faculty_members)
@@ -83,12 +97,14 @@ def logout():
 def page_not_found(e):
     """
     Fallback handler for SPA navigation and Vercel serverless rewrites.
-    Renders index.html for authenticated users or redirects to login.
+    Renders login.html or index.html directly without issuing redirects.
     """
-    if request.path.startswith("/api/") and not (request.path.startswith("/api/index") or request.path in ["/api", "/api/"]):
+    if request.path.startswith("/api/"):
         return jsonify({"error": "API route not found", "path": request.path}), 404
     if not session.get("logged_in"):
-        return redirect(url_for("login_page"))
+        students = db.get_all_students()
+        faculty_members = db.get_all_faculty()
+        return render_template("login.html", students=students, faculty_members=faculty_members)
     return render_template("index.html")
 
 
