@@ -22,7 +22,7 @@
   <!-- Application CSS -->
   <link rel="stylesheet" href="/static/css/style.css">
 </head>
-<body>
+<body class="{{ 'is-faculty' if role == 'faculty' else 'is-student' }}">
   <!-- Global App Container -->
   <div class="app-layout">
     
@@ -41,8 +41,8 @@
       <!-- Quick Role & Identity Card -->
       <div class="identity-card" id="identity-card-box">
         <div class="identity-header">
-          <span class="badge-role" id="active-role-badge">Student</span>
-          <span class="identity-label" id="active-identity-label">Portal</span>
+          <span class="badge-role" id="active-role-badge">{{ 'Faculty' if role == 'faculty' else 'Student' }}</span>
+          <span class="identity-label" id="active-identity-label">{{ 'Faculty Portal' if role == 'faculty' else 'Student Portal' }}</span>
         </div>
         <div class="identity-body">
           <div class="avatar" id="active-avatar">{{ (user_name.split()[0][0] + (user_name.split()[-1][0] if user_name.split()|length > 1 else ''))|upper if user_name else 'ST' }}</div>
@@ -65,7 +65,7 @@
       <nav class="nav-menu">
         <!-- STUDENT ONLY SECTION -->
         <div class="nav-section-title role-student-only">STUDENT PORTAL</div>
-        <a href="#home" class="nav-item active role-student-only" data-tab="home">
+        <a href="#home" class="nav-item {{ 'active' if role != 'faculty' else '' }} role-student-only" data-tab="home">
           <i class="fa-solid fa-house"></i>
           <span>Home & Overview</span>
         </a>
@@ -84,7 +84,7 @@
 
         <!-- FACULTY ONLY SECTION -->
         <div class="nav-section-title role-faculty-only">FACULTY PORTAL</div>
-        <a href="#faculty-dash" class="nav-item role-faculty-only" data-tab="faculty-dash">
+        <a href="#faculty-dash" class="nav-item {{ 'active' if role == 'faculty' else '' }} role-faculty-only" data-tab="faculty-dash">
           <i class="fa-solid fa-chart-pie"></i>
           <span>Faculty Analytics</span>
         </a>
@@ -145,7 +145,7 @@
         <div class="nav-breadcrumbs">
           <span id="breadcrumb-section">SkillGraph</span>
           <i class="fa-solid fa-chevron-right separator"></i>
-          <span id="breadcrumb-current" class="current">Home & Overview</span>
+          <span id="breadcrumb-current" class="current">{{ 'Faculty Analytics' if role == 'faculty' else 'Home & Overview' }}</span>
         </div>
 
         <div class="top-actions">
@@ -162,7 +162,7 @@
       </header>
 
       <!-- TAB 1: HOME & OVERVIEW -->
-      <section id="tab-home" class="content-tab active">
+      <section id="tab-home" class="content-tab {{ 'active' if role != 'faculty' else '' }}">
         <div class="hero-banner">
           <div class="hero-content">
             <div class="hero-badge">
@@ -679,7 +679,7 @@
       </section>
 
       <!-- TAB 8: FACULTY DASHBOARD -->
-      <section id="tab-faculty-dash" class="content-tab">
+      <section id="tab-faculty-dash" class="content-tab {{ 'active' if role == 'faculty' else '' }}">
         <div class="section-header">
           <div>
             <h2>Faculty Analytics Dashboard</h2>

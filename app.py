@@ -78,7 +78,15 @@ def index():
     role = session.get("role", "student")
     user_dept = ""
     if role == "faculty":
-        user_dept = "Faculty Advisor & Evaluator"
+        fac = db.get_faculty_by_id(session.get("faculty_id")) if session.get("faculty_id") else None
+        if fac:
+            user_dept = f"{fac.get('designation', 'Faculty Advisor')} • {fac.get('department', 'CSE')}"
+            if not user_name:
+                user_name = fac["name"]
+        else:
+            user_dept = "Faculty Advisor & Evaluator"
+            if not user_name:
+                user_name = "Faculty Member"
     else:
         st = db.get_student_by_id(session.get("student_id", 1))
         if st:
@@ -90,7 +98,8 @@ def index():
         user_name=user_name,
         role=role,
         user_dept=user_dept,
-        student_id=session.get("student_id")
+        student_id=session.get("student_id"),
+        faculty_id=session.get("faculty_id")
     )
 
 
@@ -175,6 +184,7 @@ def api_login():
             session["logged_in"] = True
             session["role"] = "faculty"
             session["user_name"] = "Dr. S. K. Raman"
+            session["faculty_id"] = 1
             return jsonify({
                 "success": True,
                 "role": "faculty",
@@ -370,19 +380,36 @@ def manage_session():
         })
 
     user_name = session.get("user_name")
-    if not user_name:
-        if session.get("role") == "faculty":
-            user_name = "Dr. S. K. Raman"
+    user_dept = ""
+    if session.get("role") == "faculty":
+        fac = db.get_faculty_by_id(session.get("faculty_id")) if session.get("faculty_id") else None
+        if fac:
+            user_dept = f"{fac.get('designation', 'Faculty Advisor')} • {fac.get('department', 'CSE')}"
+            if not user_name:
+                user_name = fac["name"]
         else:
-            st = db.get_student_by_id(session.get("student_id", 1))
-            user_name = st["name"] if st else "Student"
-        session["user_name"] = user_name
+            user_dept = "Faculty Advisor & Evaluator"
+            if not user_name:
+                user_name = "Faculty Member"
+    else:
+        st = db.get_student_by_id(session.get("student_id", 1))
+        if st:
+            user_dept = f"{st.get('department', 'CSE')} • Year {st.get('year', '3')}"
+            if not user_name:
+                user_name = st["name"]
+        else:
+            user_dept = "Computer Science • Year 3"
+            if not user_name:
+                user_name = "Student Profile"
+
+    session["user_name"] = user_name
 
     return jsonify({
         "logged_in": True,
         "role": session.get("role", "student"),
         "student_id": session.get("student_id"),
         "user_name": session.get("user_name"),
+        "user_dept": user_dept,
         "faculty_id": session.get("faculty_id", None)
     })
 

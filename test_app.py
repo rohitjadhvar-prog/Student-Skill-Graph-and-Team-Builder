@@ -199,6 +199,18 @@ class SkillGraphTestCase(unittest.TestCase):
         self.assertTrue(data["success"])
         self.assertEqual(data["user"]["role"], "Faculty")
 
+        # Verify active session has registered faculty details
+        sess_res = self.app.get("/api/session")
+        sess_data = sess_res.get_json()
+        self.assertEqual(sess_data["role"], "faculty")
+        self.assertEqual(sess_data["user_name"], "Dr. Testing Faculty")
+
+        # Verify index page renders faculty name and faculty portal
+        index_res = self.app.get("/")
+        self.assertEqual(index_res.status_code, 200)
+        self.assertIn(b"Dr. Testing Faculty", index_res.data)
+        self.assertIn(b"Faculty Portal", index_res.data)
+
         # 6. Login as newly registered faculty
         res = self.app.post("/api/login", json={
             "role": "faculty",
@@ -209,6 +221,11 @@ class SkillGraphTestCase(unittest.TestCase):
         data = res.get_json()
         self.assertTrue(data["success"])
         self.assertEqual(data["role"], "faculty")
+
+        # Verify index page still renders faculty name after login
+        index_res = self.app.get("/")
+        self.assertEqual(index_res.status_code, 200)
+        self.assertIn(b"Dr. Testing Faculty", index_res.data)
 
         # 7. Logout
         res = self.app.post("/api/logout")

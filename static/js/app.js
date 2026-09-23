@@ -134,6 +134,7 @@ async function onTabOpened(tabName) {
 // Session & Identity Management
 // ==========================================
 let currentUserName = "";
+let currentUserDept = "";
 
 async function loadSession() {
   try {
@@ -146,6 +147,7 @@ async function loadSession() {
     currentRole = data.role || "student";
     currentStudentId = data.student_id || 1;
     currentUserName = data.user_name || "";
+    currentUserDept = data.user_dept || "";
     updateIdentityUI();
   } catch (err) {
     console.error("Failed to load session:", err);
@@ -179,11 +181,12 @@ function updateIdentityUI() {
     }
     if (idLabel) idLabel.textContent = "Faculty Portal";
     if (avatar) {
-      avatar.textContent = "Prof";
+      const initials = (currentUserName || "Prof").split(" ").map(w => w[0]).slice(0, 2).join("");
+      avatar.textContent = initials.toUpperCase();
       avatar.style.borderColor = "var(--accent)";
     }
-    if (nameEl) nameEl.textContent = currentUserName || "Dr. S. K. Raman";
-    if (subEl) subEl.textContent = "Faculty Advisor & Evaluator";
+    if (nameEl) nameEl.textContent = currentUserName || "Faculty Member";
+    if (subEl) subEl.textContent = currentUserDept || "Faculty Advisor & Evaluator";
     if (navProjects) navProjects.textContent = "Manage Projects";
     if (projectsSub) projectsSub.textContent = "Faculty capstone projects with skill prerequisites and team size targets";
   } else {
@@ -208,6 +211,7 @@ function updateIdentityUI() {
       const initials = currentUserName.split(" ").map(w => w[0]).slice(0, 2).join("");
       if (avatar) avatar.textContent = initials.toUpperCase();
       if (nameEl) nameEl.textContent = currentUserName;
+      if (subEl) subEl.textContent = currentUserDept || "Student Profile";
     }
   }
 }
@@ -293,13 +297,18 @@ async function loadGlobalData() {
 }
 
 async function refreshActiveView() {
-  await loadStudentData(currentStudentId);
+  if (currentRole === "faculty") {
+    switchTab("faculty-dash");
+  } else {
+    await loadStudentData(currentStudentId);
+  }
 }
 
 // ==========================================
 // Student Dashboard & Profile
 // ==========================================
 async function loadStudentData(studentId) {
+  if (currentRole === "faculty") return;
   try {
     const res = await fetch(`/api/students/${studentId}`);
     if (!res.ok) return;

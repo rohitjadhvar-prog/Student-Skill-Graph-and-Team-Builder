@@ -528,6 +528,17 @@ def get_faculty_by_email(email):
     return dict(row) if row else None
 
 
+def get_faculty_by_id(faculty_id):
+    """Demonstrates SELECT faculty member by primary key."""
+    if not faculty_id:
+        return None
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    row = cursor.execute("SELECT * FROM faculty WHERE faculty_id = ?;", (faculty_id,)).fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
 def create_faculty(data):
     """
     Demonstrates INSERT operation into faculty table.
