@@ -139,6 +139,10 @@ async function loadSession() {
   try {
     const res = await fetch("/api/session");
     const data = await res.json();
+    if (!data.logged_in) {
+      window.location.href = "/login";
+      return;
+    }
     currentRole = data.role || "student";
     currentStudentId = data.student_id || 1;
     currentUserName = data.user_name || "";

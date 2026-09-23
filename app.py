@@ -34,21 +34,25 @@ db.init_db()
 # Frontend Routes
 # ==========================================
 
-@app.route("/")
 @app.route("/index")
 @app.route("/index.html")
 @app.route("/api")
 @app.route("/api/")
 @app.route("/api/index")
 @app.route("/api/index.py")
+@app.route("/")
 def index():
+    if not session.get("logged_in"):
+        return redirect(url_for("login_page"))
     return render_template("index.html")
 
 
-@app.route("/login")
 @app.route("/login.html")
+@app.route("/login")
 def login_page():
     """Renders the dedicated Student and Faculty Login page."""
+    if session.get("logged_in"):
+        return redirect(url_for("index"))
     students = db.get_all_students()
     faculty_members = db.get_all_faculty()
     return render_template("login.html", students=students, faculty_members=faculty_members)
@@ -65,10 +69,12 @@ def logout():
 def page_not_found(e):
     """
     Fallback handler for SPA navigation and Vercel serverless rewrites.
-    Renders index.html for page requests or returns JSON for non-existent API endpoints.
+    Renders index.html for authenticated users or redirects to login.
     """
     if request.path.startswith("/api/") and not (request.path.startswith("/api/index") or request.path in ["/api", "/api/"]):
         return jsonify({"error": "API route not found", "path": request.path}), 404
+    if not session.get("logged_in"):
+        return redirect(url_for("login_page"))
     return render_template("index.html")
 
 
@@ -306,10 +312,15 @@ def manage_session():
                 "user_name": session.get("user_name", "Student")
             })
 
-    # Default session: Student 1 (Aditya Sharma)
-    if "role" not in session:
-        session["role"] = "student"
-        session["student_id"] = 1
+    # Check if user is authenticated
+    if not session.get("logged_in"):
+        return jsonify({
+            "logged_in": False,
+            "role": None,
+            "student_id": None,
+            "user_name": None,
+            "faculty_id": None
+        })
 
     user_name = session.get("user_name")
     if not user_name:
@@ -317,14 +328,14 @@ def manage_session():
             user_name = "Dr. S. K. Raman"
         else:
             st = db.get_student_by_id(session.get("student_id", 1))
-            user_name = st["name"] if st else "Aditya Sharma"
+            user_name = st["name"] if st else "Student"
         session["user_name"] = user_name
 
     return jsonify({
-        "logged_in": session.get("logged_in", True),
+        "logged_in": True,
         "role": session.get("role", "student"),
-        "student_id": session.get("student_id", 1),
-        "user_name": session.get("user_name", "Aditya Sharma"),
+        "student_id": session.get("student_id"),
+        "user_name": session.get("user_name"),
         "faculty_id": session.get("faculty_id", None)
     })
 

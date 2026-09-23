@@ -68,7 +68,8 @@ class SkillGraphTestCase(unittest.TestCase):
 
     def test_4_flask_routes(self):
         """Verify key API endpoints return HTTP 200."""
-        res = self.app.get("/")
+        # Root route redirects unauthenticated visitors to login
+        res = self.app.get("/", follow_redirects=True)
         self.assertEqual(res.status_code, 200)
 
         res = self.app.get("/api/students")
