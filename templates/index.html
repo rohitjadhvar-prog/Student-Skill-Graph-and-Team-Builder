@@ -45,10 +45,10 @@
           <span class="identity-label" id="active-identity-label">Portal</span>
         </div>
         <div class="identity-body">
-          <div class="avatar" id="active-avatar">AS</div>
+          <div class="avatar" id="active-avatar">{{ (user_name.split()[0][0] + (user_name.split()[-1][0] if user_name.split()|length > 1 else ''))|upper if user_name else 'ST' }}</div>
           <div class="identity-meta">
-            <h4 id="active-user-name">Aditya Sharma</h4>
-            <p id="active-user-sub">Computer Science • Year 2</p>
+            <h4 id="active-user-name">{{ user_name or 'Student Profile' }}</h4>
+            <p id="active-user-sub">{{ user_dept or 'Student Portal' }}</p>
           </div>
         </div>
         <div class="identity-actions" style="display: flex; gap: 6px; flex-direction: column;">

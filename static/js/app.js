@@ -204,6 +204,10 @@ function updateIdentityUI() {
       if (avatar) avatar.textContent = initials.toUpperCase();
       if (nameEl) nameEl.textContent = currentStudent.name;
       if (subEl) subEl.textContent = `${currentStudent.department} • Year ${currentStudent.year}`;
+    } else if (currentUserName) {
+      const initials = currentUserName.split(" ").map(w => w[0]).slice(0, 2).join("");
+      if (avatar) avatar.textContent = initials.toUpperCase();
+      if (nameEl) nameEl.textContent = currentUserName;
     }
   }
 }
@@ -300,6 +304,20 @@ async function loadStudentData(studentId) {
     const res = await fetch(`/api/students/${studentId}`);
     if (!res.ok) return;
     const student = await res.json();
+
+    // 0. Update Sidebar Identity from loaded student
+    if (student && student.name) {
+      currentUserName = student.name;
+      const sidebarNameEl = document.getElementById("active-user-name");
+      const sidebarSubEl = document.getElementById("active-user-sub");
+      const sidebarAvatar = document.getElementById("active-avatar");
+      if (sidebarNameEl) sidebarNameEl.textContent = student.name;
+      if (sidebarSubEl) sidebarSubEl.textContent = `${student.department} • Year ${student.year}`;
+      if (sidebarAvatar) {
+        const initials = student.name.split(" ").map(w => w[0]).slice(0, 2).join("");
+        sidebarAvatar.textContent = initials.toUpperCase();
+      }
+    }
 
     // 1. Update Student Dash KPIs
     const countEl = document.getElementById("dash-skill-count");

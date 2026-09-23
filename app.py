@@ -74,7 +74,24 @@ db.init_db()
 def index():
     if not session.get("logged_in"):
         return redirect(url_for("login_page"))
-    return render_template("index.html")
+    user_name = session.get("user_name")
+    role = session.get("role", "student")
+    user_dept = ""
+    if role == "faculty":
+        user_dept = "Faculty Advisor & Evaluator"
+    else:
+        st = db.get_student_by_id(session.get("student_id", 1))
+        if st:
+            user_dept = f"{st['department']} • Year {st['year']}"
+            if not user_name:
+                user_name = st["name"]
+    return render_template(
+        "index.html",
+        user_name=user_name,
+        role=role,
+        user_dept=user_dept,
+        student_id=session.get("student_id")
+    )
 
 
 @app.route("/login.html")
