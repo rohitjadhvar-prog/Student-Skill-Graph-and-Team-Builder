@@ -26,6 +26,24 @@ app = Flask(
 )
 app.secret_key = "college_project_secret_key_student_skills_graph"
 
+# WSGI Middleware to restore original request URL on Vercel
+class VercelPathMiddleware:
+    """
+    WSGI middleware for Vercel serverless deployments.
+    Restores the original request URL from HTTP_X_MATCHED_PATH,
+    preventing infinite redirect loops caused by Vercel rewrite destinations.
+    """
+    def __init__(self, wsgi_app):
+        self.wsgi_app = wsgi_app
+
+    def __call__(self, environ, start_response):
+        matched = environ.get("HTTP_X_MATCHED_PATH") or environ.get("HTTP_X_FORWARDED_URI") or environ.get("HTTP_X_REWRITE_URL")
+        if matched:
+            environ["PATH_INFO"] = matched.split("?")[0]
+        return self.wsgi_app(environ, start_response)
+
+app.wsgi_app = VercelPathMiddleware(app.wsgi_app)
+
 # Ensure database tables exist and sample data is seeded
 db.init_db()
 
@@ -36,10 +54,6 @@ db.init_db()
 
 @app.route("/index")
 @app.route("/index.html")
-@app.route("/api")
-@app.route("/api/")
-@app.route("/api/index")
-@app.route("/api/index.py")
 @app.route("/")
 def index():
     if not session.get("logged_in"):
