@@ -35,11 +35,18 @@ db.init_db()
 # ==========================================
 
 @app.route("/")
+@app.route("/index")
+@app.route("/index.html")
+@app.route("/api")
+@app.route("/api/")
+@app.route("/api/index")
+@app.route("/api/index.py")
 def index():
     return render_template("index.html")
 
 
 @app.route("/login")
+@app.route("/login.html")
 def login_page():
     """Renders the dedicated Student and Faculty Login page."""
     students = db.get_all_students()
@@ -52,6 +59,17 @@ def logout():
     """Clears the session and redirects to the login page."""
     session.clear()
     return redirect(url_for("login_page"))
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    """
+    Fallback handler for SPA navigation and Vercel serverless rewrites.
+    Renders index.html for page requests or returns JSON for non-existent API endpoints.
+    """
+    if request.path.startswith("/api/") and not (request.path.startswith("/api/index") or request.path in ["/api", "/api/"]):
+        return jsonify({"error": "API route not found", "path": request.path}), 404
+    return render_template("index.html")
 
 
 # ==========================================
